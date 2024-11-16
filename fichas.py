@@ -55,7 +55,7 @@ def crear_ficha(cursor, conexion):
             print(f"{Fore.RED}Ficha ya existente!")
 
 
-def eliminar_ficha(cursor, conexion):
+def eliminar_ficha(cursor, conexion):  
         print("\nEliminacion de fichas!\n")
         numeros_fichas = fichas.abrir_json_fichas()
         ficha_eliminar = int(input("Ingrese el numero de la ficha a eliminar: "))
