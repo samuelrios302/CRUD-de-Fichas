@@ -1,5 +1,35 @@
 import json
+from os import system
+from colorama import Fore, init
+import tabulate
 import fichas as fichas
+
+init(autoreset=True)
+
+def menu():
+    
+    print("\nMenu de opciones\n")
+    print("A. Crear ficha")
+    print("B. Eliminar ficha")
+    print("C. Agregar aprendiz")
+    print("D. Eliminar aprendiz")
+    print("E. Actualizar aprendiz")
+    print("F. Visualizar aprendiz")
+    print("G. Salir del menu\n")
+
+    opcion = input("Mi opcion es: ").strip().upper()
+
+    if opcion.isalpha() and opcion in ('A','B','C','D','E','F','G'):
+        return opcion
+    
+    else:
+        print(f"{Fore.RED}Opcion incorrecta del menu!")
+        return menu()
+
+def control_flujo():
+    input("Presione Enter para continuar...")
+    system('cls')
+
 
 # Comprueba si hay algun aprendiz en la lista de diccionarios de las identificaciones
 def comprobacion_aprendices(identificacion, numeros_identificaciones):
@@ -55,10 +85,10 @@ def agregar_aprendiz(cursor, conexion):
 
             sql = ""
         else:
-            print("El aprendiz ya esta registrada en alguna ficha!")
+            print(f"{Fore.RED}El aprendiz ya esta registrada en alguna ficha!")
     
     else:
-        print("Ficha no existente!")
+        print(f"{Fore.RED}Ficha no existente!")
 
 # Funcion que elimina un aprendiz de la base de datos y la identificacion del JSON
 def eliminar_aprendices(cursor, conexion):
@@ -76,10 +106,45 @@ def eliminar_aprendices(cursor, conexion):
 
         for indice,diccionario in enumerate(numeros_identificaciones):
             if diccionario['identificacion'] == identificacion:
-                print(diccionario)
+                numeros_identificaciones.pop(indice)
                 break
 
         actualizar_json_aprendices()
 
     else:
-        print("Aprendiz no existente!")
+        print(f"{Fore.RED}Aprendiz no existente!")
+
+
+def actualizar_aprendices(cursor, conexion):
+    numeros_identificaciones = abrir_json_aprendices()
+    identificacion = int(input("Ingrese la identificacion del aprendiz que desea actualizarle los datos: "))
+
+    actualizar_switch = comprobacion_aprendices(identificacion, numeros_identificaciones)
+
+    if not actualizar_switch:
+        print("\nActualización de datos!\n")
+        sql = "UPDATE aprendices SET edad = %s, telefono = %s, correo = %s WHERE id_aprendiz = %s"
+        edad = int(input("Ingrese la edad: "))
+        telefono = int(input("Ingrese la teléfono: "))
+        correo = input("Ingrese el correo: ")
+        valores = (edad, telefono, correo, identificacion)
+        cursor.execute(sql, valores)
+        conexion.commit()
+    else:
+        print(f"{Fore.RED}Aprendiz no existente!")
+
+def visualizar_aprendices(cursor, conexion):
+    print("\nVisualización de datos del algún aprendiz!\n")
+    numeros_identificaciones = abrir_json_aprendices()
+    identificacion = int(input("Ingrese la identificación: "))
+
+    visualizar_switch = comprobacion_aprendices(identificacion, numeros_identificaciones)
+
+    if not visualizar_switch:
+        sql = f"SELECT * FROM aprendices WHERE id_aprendiz = {identificacion}"
+        cursor.execute(sql)
+        datos = cursor.fetchall()
+        print(tabulate.tabulate(datos, ("Identificacion", "Nombre", "Apellido", "Edad", "Teléfono", "Correo", "Programa", "# ficha"), tablefmt='fancy_grid'))
+    else:
+        print(f"{Fore.RED}Aprendiz no existente!")
+        

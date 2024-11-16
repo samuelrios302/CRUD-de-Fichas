@@ -1,4 +1,6 @@
 import json
+
+from colorama import Fore
 import fichas as fichas
 
 def abrir_json_fichas():
@@ -26,6 +28,9 @@ def comprobacion_ficha(numero_ficha, numeros_fichas):
 
 
 def crear_ficha(cursor, conexion):
+        
+        print("\nCreacion de fichas!\n")
+
         numeros_fichas = abrir_json_fichas()
 
         numero_ficha = int(input("Ingrese el numero de ficha: "))
@@ -47,10 +52,11 @@ def crear_ficha(cursor, conexion):
 
             actualizar_json_fichas()
         else:
-            print("Ficha ya existente!")
+            print(f"{Fore.RED}Ficha ya existente!")
 
 
 def eliminar_ficha(cursor, conexion):
+        print("\nEliminacion de fichas!\n")
         numeros_fichas = fichas.abrir_json_fichas()
         ficha_eliminar = int(input("Ingrese el numero de la ficha a eliminar: "))
 
@@ -62,14 +68,31 @@ def eliminar_ficha(cursor, conexion):
                 break
         
         if not ficha_switch:
-            sql_estudiantes = f"""DELETE FROM aprendices WHERE numero_ficha = {ficha_eliminar}"""
-            sql_ficha = f"""DELETE FROM fichas WHERE numero_ficha = {ficha_eliminar}"""
+            contador = 0
+            for diccionario in numeros_fichas:
+                contador += 1
+            if contador > 0:
+                print("\n¿Quieres eliminarla por completo? puede contener aprendices!")
+                print("A. Si, quiero eliminarla")
+                print("B. No, prefiero preservarla\n")
+                opcion_menu = input("Mi opción es: ").upper().strip()
+                if opcion_menu == 'A':
 
-            cursor.execute(sql_estudiantes)
-            conexion.commit()
-            cursor.execute(sql_ficha)
-            conexion.commit()
+                    sql_estudiantes = f"""DELETE FROM aprendices WHERE numero_ficha = {ficha_eliminar}"""
+                    sql_ficha = f"""DELETE FROM fichas WHERE numero_ficha = {ficha_eliminar}"""
 
-            fichas.actualizar_json_fichas()
+                    cursor.execute(sql_ficha)
+                    conexion.commit()
+                    cursor.execute(sql_estudiantes)
+                    conexion.commit()
+
+                    fichas.actualizar_json_fichas()
+                elif opcion_menu == 'B':
+                    print(f"{Fore.MAGENTA}Se cancelo la eliminacion de la ficha")
+                else:
+                    print(f"{Fore.RED}Opcion incorrecta! no se eliminara la ficha!")
+
+            else:
+                print(f"{Fore.RED}No existe ninguna ficha para eliminar!")
         else:
-            print("Ficha no encontrada!")
+            print(f"{Fore.RED}Ficha no encontrada!")
