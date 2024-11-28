@@ -2,10 +2,11 @@ import json
 from os import system
 from colorama import Fore, init
 import tabulate
-import fichas as fichas
+import fichas
 
 init(autoreset=True)
 
+# Menu de opciones
 def menu():
     
     print("\nMenu de opciones\n")
@@ -15,11 +16,12 @@ def menu():
     print("D. Eliminar aprendiz")
     print("E. Actualizar aprendiz")
     print("F. Visualizar aprendiz")
-    print("G. Salir del menu\n")
+    print("G. Listar aprendices por ficha")
+    print("H. Salir del menu\n")
 
     opcion = input("Mi opcion es: ").strip().upper()
 
-    if opcion.isalpha() and opcion in ('A','B','C','D','E','F','G'):
+    if opcion.isalpha() and opcion in ('A','B','C','D','E','F','G','H'):
         return opcion
     
     else:
@@ -27,6 +29,8 @@ def menu():
         control_flujo()
         return menu()
 
+
+# limpiar la pantalla
 def control_flujo():
     input("Presione Enter para continuar...")
     system('cls')
@@ -53,11 +57,13 @@ def abrir_json_aprendices():
         return numeros_identificaciones
 
 
+# Actualizacion del json de las identificaciones de los aprendices
 def actualizar_json_aprendices(numeros_identificaciones):
     with open('identificaciones.json', 'w') as archivo_json:
         json.dump(numeros_identificaciones, archivo_json)
 
 
+# Eliminar aprendices de alguna ficha
 def eliminar_aprendices_ficha(ficha_eliminar):
     numeros_identificaciones_viejas = abrir_json_aprendices()
 
@@ -66,6 +72,7 @@ def eliminar_aprendices_ficha(ficha_eliminar):
     actualizar_json_aprendices(numeros_identificaciones)
 
 
+# Agregar aprendiz a una ficha
 def agregar_aprendiz(cursor, conexion):
     print(f"\n{Fore.MAGENTA}Agregar un aprendiz\n")
     numeros_fichas = fichas.abrir_json_fichas()
@@ -127,6 +134,7 @@ def eliminar_aprendices(cursor, conexion):
         print(f"{Fore.RED}Aprendiz no existente!")
 
 
+# Funcion para actualizar datos de aprendices
 def actualizar_aprendices(cursor, conexion):
     print(f"\n{Fore.MAGENTA}Actualización de datos de algun aprendiz!\n")
     numeros_identificaciones = abrir_json_aprendices()
@@ -148,6 +156,7 @@ def actualizar_aprendices(cursor, conexion):
         print(f"{Fore.RED}Aprendiz no existente!")
 
 
+# Funcion para visualizar los datos de un aprendiz
 def visualizar_aprendices(cursor, conexion):
     print(f"\n{Fore.MAGENTA}Visualización de datos del algún aprendiz!\n")
     numeros_identificaciones = abrir_json_aprendices()

@@ -1,10 +1,12 @@
 import json
 from colorama import Fore, init
+from tabulate import tabulate
 import fichas 
 import aprendices
 
 init(autoreset=True)
 
+# Abre y carga los diccionarios de todas las fichas almacenadas en el JSON
 def abrir_json_fichas():
     global numeros_fichas
     try:
@@ -14,12 +16,13 @@ def abrir_json_fichas():
         numeros_fichas = []
     return numeros_fichas
 
-
+# Actualizar el JSON con los nueva ficha registrada
 def actualizar_json_fichas():
     with open('numeros_fichas.json', 'w') as archivo_json:
         json.dump(numeros_fichas, archivo_json)
 
 
+# Comprobacion de una ficha existente
 def comprobacion_ficha(numero_ficha, numeros_fichas):
         ficha_switch = True
         for diccionario in numeros_fichas:
@@ -28,7 +31,7 @@ def comprobacion_ficha(numero_ficha, numeros_fichas):
                 break
         return ficha_switch
 
-
+# Crear una ficha
 def crear_ficha(cursor, conexion):
         
         print(f"\n{Fore.MAGENTA}Creacion de fichas!\n")
@@ -59,6 +62,7 @@ def crear_ficha(cursor, conexion):
             print(f"{Fore.RED}Ficha ya existente!")
 
 
+# Eliminar alguna ficha
 def eliminar_ficha(cursor, conexion):  
         print(f"\n{Fore.MAGENTA}Eliminacion de fichas!\n")
         numeros_fichas = fichas.abrir_json_fichas()
@@ -78,7 +82,10 @@ def eliminar_ficha(cursor, conexion):
             print("B. No, prefiero preservarla\n")
             opcion_menu = input("Mi opción es: ").upper().strip()
             if opcion_menu == 'A':
+                # Sentencia para eliminar los aprendices de la ficha a eliminar
                 sql_estudiantes = f"""DELETE FROM aprendices WHERE numero_ficha = {ficha_eliminar}"""
+                
+                # Sentencia para eliminar la ficha de la tabla de fichas
                 sql_ficha = f"""DELETE FROM fichas WHERE numero_ficha = {ficha_eliminar}"""
                 cursor.execute(sql_estudiantes)
                 conexion.commit()
@@ -98,3 +105,19 @@ def eliminar_ficha(cursor, conexion):
 
         else:
             print(f"{Fore.RED}Ficha no encontrada!")
+
+# Visualizar todos los aprendices de una ficha
+def visualizar_ficha(cursor):
+    print(f"\n{Fore.MAGENTA}Listar aprendices por ficha!\n")
+    numeros_fichas = abrir_json_fichas()
+    ficha_listar = int(input("Ingrese la ficha: "))
+    swicth_ficha = comprobacion_ficha(ficha_listar,numeros_fichas)
+
+    if not swicth_ficha:
+        sql = f"SELECT * FROM aprendices WHERE numero_ficha = {ficha_listar}"
+        cursor.execute(sql)
+        datos = cursor.fetchall()
+        print("")
+        print(tabulate(datos,("Identificación", "Nombre", "Apellido", "Edad","Teléfono","Correo","Programa de formación","Numero de Ficha"),tablefmt='fancy_grid'))
+    else:
+        print(f"{Fore.RED}Ficha no existente!")
